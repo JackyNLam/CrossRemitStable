@@ -597,7 +597,7 @@
           <div class="hero-badge">Core Liquidity Hub</div>
           <h1 class="hero-headline">Instant <span>Cross-Border</span> Liquidity Bridge</h1>
           <p class="hero-sub section-sub">
-            The core liquidity engine of the Web3 remittance ecosystem. Seamlessly swap between local fiat-pegged <b>SSU</b> and global USD-pegged <b>CRS</b> with real-time on-chain settlement.
+            The core liquidity engine of the Web3 remittance ecosystem. Seamlessly swap between local fiat-pegged <b>SSU, SSE</b> and the dynamic pegged <b>CRS</b> with real-time on-chain settlement.
           </p>
           <div class="hero-container">
             <div class="hero-cta">
@@ -607,7 +607,7 @@
             
             <div class="hero-cta mt-16">
               <a href="ssu_hk_gateway.html" class="btn btn-outline">SSU HK Gateway</a>
-              <a href="ssu_cn_gateway.html" class="btn btn-outline">SSE CN Gateway</a>
+              <a href="sse_cn_gateway.html" class="btn btn-outline">SSE CN Gateway</a>
             </div>
           </div>
           <div style="margin-top: 32px; display: flex; gap: 24px; font-size: 0.85rem; color: #64748b;">
@@ -644,7 +644,7 @@
               </div>
               <div class="swap-input-row">
                 <input type="number" class="swap-input" id="outputAmount" value="0.997" readonly>
-                <div class="token-select">
+                  <div class="token-select" id="toTokenSelector" onclick="toggleToToken()" style="cursor: pointer;">
                   <div class="token-icon" style="background:#10b981">C</div>
                   <span id="toToken">CRS</span>
                 </div>
@@ -699,7 +699,7 @@
           <p class="l-desc">Inbound remittance path. Convert received CRS into local SSE for fiat withdrawal.</p>
           <span class="l-tag">Active • 8M+ TVL</span>
         </div>
-        <div class="l-card">
+        <div class="l-card" id="pool-statistics">
           <div class="l-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           </div>
@@ -731,7 +731,7 @@
         <div class="step-item">
           <div class="step-num">2</div>
           <h4 class="step-title">Select Pair</h4>
-          <p class="step-desc">Choose SSU → CRS or CRS → SSU based on your needs.</p>
+          <p class="step-desc">Choose SSU → CRS or CRS → SSE based on your needs.</p>
         </div>
         <div class="step-item">
           <div class="step-num">3</div>
@@ -802,7 +802,7 @@
 
       <div class="bridge-viz">
         <div class="token-node">
-          <h4 style="color: #4facfe; margin-bottom: 10px;">SSU</h4>
+          <h4 style="color: #4facfe; margin-bottom: 10px;">SSU / SSE</h4>
           <p style="font-size: 0.85rem; opacity: 0.8;">Local Fiat-Pegged Stablecoin<br>(HKD / RMB / SGD)</p>
           <div style="margin-top: 15px; font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 5px;">Local Entry/Exit</div>
         </div>
@@ -867,7 +867,7 @@
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-content">
-            <p>It is the core liquidity hub of the Web3 remittance ecosystem. It allows instant, low-cost swaps between local fiat-pegged SSU and global USD-pegged CRS on the BASE chain.</p>
+            <p>It is the core liquidity hub of the Web3 remittance ecosystem. It allows instant, low-cost swaps between local fiat-pegged SSU and the pegged CRS on the BASE chain.</p>
           </div>
         </div>
         <div class="faq-item">
@@ -918,7 +918,7 @@
         <p class="section-sub">Experience the future of cross-border value transfer today.</p>
         <div class="hero-cta">
           <a href="#swap" class="btn btn-primary" style="background: #fff; color: var(--accent);">Start Exchanging Now</a>
-          <a href="#" class="btn btn-outline" style="border-color: #fff; color: #fff;">View Pool on Uniswap</a>
+          <a href="#pool-statistics" class="btn btn-outline" style="border-color: #fff; color: #fff;">View Pool on Uniswap</a>
         </div>
       </div>
     </div>
@@ -930,8 +930,8 @@
       <div class="footer-grid">
         <div>
           <a href="#" class="nav-logo">
-            <div class="logo-icon">S↔C</div>
-            <span>SSU ↔ CRS</span>
+            <div class="logo-icon">CRS</div>
+            <span>CrossRemitStable</span>
           </a>
           <p class="footer-desc">
             The Core Liquidity Hub of the Web3 Cross-Border Remittance Ecosystem. Bridging local stablecoins with global settlement standards.
@@ -957,7 +957,7 @@
         </div>
       </div>
       <div class="copyright">
-        &copy; 2026 SSU ↔ CRS Exchange Platform. Built for the Web3 Remittance Course Project.
+        &copy; 2026 CrossRemitStable Platform. Built for the Web3 Remittance Course Project.
       </div>
     </div>
   </footer>
@@ -975,9 +975,20 @@
     }
 
     // Swap Logic Simulation
+    let currentToToken = "CRS";
     let isFlipped = false;
-    const rate = 0.01;
+    const rate = currentToToken==="CRS"?0.01:0.0095;
     const feePercent = 0.003;
+
+  function toggleToToken() {
+  const t=document.getElementById('toToken'),i=document.getElementById('toTokenIcon');
+  currentToToken=currentToToken==="CRS"?"SSE":"CRS";
+  t.innerText=currentToToken;
+  i.innerText=currentToToken==="CRS"?"C":"S";
+  i.style.background=currentToToken==="CRS"?"#10b981":"#8b5cf6";
+  calculateSwap();
+  }
+
 
     function calculateSwap() {
       const input = document.getElementById('inputAmount');

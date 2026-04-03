@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSU 中国大陆网关 — 人民币入金，跨境汇款更快更省</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-page:    #eef4fc;
+      --bg-card:    #ffffff;
+      --accent:     #1a7fd4;
+      --text-body:  #1a2f4a;
+      --text-sec:   #1a7fd4;
+      --border:     rgba(26, 127, 212, 0.18);
+      --radius:     12px;
+      --transition: 0.25s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      font-family: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--text-sec); }
+
+    /* ─── Utility ───────────────────────────────────────────────────── */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      color: rgba(26, 47, 74, 0.75);
+      max-width: 620px;
+    }
+
+    section { padding: 88px 0; }
+
+    /* ─── Card ──────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .card:hover {
+      border-color: rgba(106, 191, 255, 0.45);
+      transform: translateY(-3px);
+    }
+
+    /* ─── Buttons ───────────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: 13px 32px;
+      border-radius: 8px;
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+      border: 2px solid transparent;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background: #1568b0;
+      border-color: #1568b0;
+      color: #ffffff;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn-outline:hover {
+      background: rgba(26, 127, 212, 0.08);
+      color: var(--text-sec);
+      border-color: var(--text-sec);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════════════════════════ */
+    #navbar {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: var(--bg-page);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text-body);
+    }
+    .nav-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(26, 47, 74, 0.75);
+      transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Hamburger */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text-body);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    @media (max-width: 768px) {
+      .nav-toggle { display: flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 68px;
+        left: 0;
+        right: 0;
+        background: var(--bg-page);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        gap: 0;
+        padding: 12px 0;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li a {
+        display: block;
+        padding: 12px 24px;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════════════ */
+    #hero {
+      padding: 100px 0 96px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle geometric background pattern */
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 65% 40%, rgba(79,163,224,0.05) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 70%, rgba(26,127,212,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(26, 127, 212, 0.08);
+      border: 1px solid rgba(26, 127, 212, 0.25);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sec);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .hero-headline {
+      font-size: clamp(2rem, 4.5vw, 3.1rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text-body);
+      margin-bottom: 20px;
+    }
+    .hero-headline .hl {
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: rgba(26, 47, 74, 0.85);
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+    .stat-item {}
+    .stat-value {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: rgba(26, 47, 74, 0.75);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Hero visual panel */
+    .hero-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .exchange-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .exchange-card .ec-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(26, 47, 74, 0.75);
+      margin-bottom: 8px;
+    }
+    .exchange-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .currency-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(26, 127, 212, 0.07);
+      border: 1px solid rgba(26, 127, 212, 0.20);
+      border-radius: 8px;
+      padding: 10px 16px;
+      flex: 1;
+    }
+    .currency-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .icon-cny { background: rgba(26,127,212,0.12); color: var(--accent); }
+    .icon-ssu { background: rgba(26,127,212,0.10); color: var(--text-sec); }
+
+    .currency-info .c-name { font-size: 0.85rem; font-weight: 700; color: var(--text-body); }
+    .currency-info .c-sub  { font-size: 0.72rem; color: rgba(26,47,74,0.65); }
+
+    .arrow-icon {
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .rate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .rate-label { font-size: 0.78rem; color: rgba(26,47,74,0.65); }
+    .rate-value { font-size: 0.9rem; font-weight: 700; color: var(--text-sec); }
+
+    .status-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #4ade80;
+      flex-shrink: 0;
+    }
+    .status-text { font-size: 0.85rem; color: rgba(26, 47, 74, 0.85); }
+    .status-text strong { color: var(--text-body); }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+      .hero-sub { margin-left: auto; margin-right: auto; }
+      .hero-cta { justify-content: center; }
+      .hero-stats { justify-content: center; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════════════════════════ */
+    #how-it-works { background: #ffffff; }
+    .steps-header { text-align: center; margin-bottom: 64px; }
+    .steps-header .section-sub { margin: 0 auto; }
+
+    .steps-wrapper {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+      position: relative;
+    }
+    /* Connector line */
+    .steps-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: rgba(26, 127, 212, 0.12);
+      z-index: 0;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .step-num {
+      width: 48px;
+      height: 48px;
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .step-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 8px;
+    }
+    .step-desc { font-size: 0.83rem; color: rgba(26, 47, 74, 0.75); }
+
+    @media (max-width: 768px) {
+      .steps-wrapper {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .steps-wrapper::before { display: none; }
+      .step { flex-direction: row; text-align: left; gap: 20px; }
+      .step-num { margin-bottom: 0; flex-shrink: 0; }
+      .step-body {}
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FEATURES
+    ═══════════════════════════════════════════════════════════════ */
+    #features { background: #f5f9fe; }
+    .features-header { text-align: center; margin-bottom: 52px; }
+    .features-header .section-sub { margin: 0 auto; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      display: flex;
+      gap: 20px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .feature-card:hover {
+      border-color: rgba(106,191,255,0.45);
+      transform: translateY(-3px);
+    }
+
+    .feat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(26,127,212,0.08);
+      border: 1px solid rgba(26,127,212,0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .feat-icon svg { width: 22px; height: 22px; }
+
+    .feat-body {}
+    .feat-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 8px;
+    }
+    .feat-desc { font-size: 0.88rem; color: rgba(26, 47, 74, 0.75); }
+
+    @media (max-width: 640px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       WHY SSU
+    ═══════════════════════════════════════════════════════════════ */
+    #why-ssu { background: var(--bg-page); }
+    .whyssu-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .whyssu-text .section-sub { margin-bottom: 32px; }
+
+    .ssu-panel {
+      background: #f5f9fe;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+    }
+    .ssu-panel-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      margin-bottom: 24px;
+    }
+    .ssu-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .ssu-info-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: rgba(26,127,212,0.10);
+      border: 1px solid rgba(26,127,212,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ssu-info-icon svg { width: 20px; height: 20px; }
+    .ssu-info-body {}
+    .ssu-info-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 4px;
+    }
+    .ssu-info-desc { font-size: 0.85rem; color: rgba(26, 47, 74, 0.75); }
+
+    @media (max-width: 900px) {
+      .whyssu-inner { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       USE CASES
+    ═══════════════════════════════════════════════════════════════ */
+    #use-cases { background: #f5f9fe; }
+    .usecases-header { text-align: center; margin-bottom: 52px; }
+    .usecases-header .section-sub { margin: 0 auto; }
+
+    .usecases-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .usecase-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .usecase-card:hover {
+      border-color: rgba(106,191,255,0.45);
+      transform: translateY(-3px);
+    }
+
+    .uc-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .uc-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(26,127,212,0.08);
+      border: 1px solid rgba(26,127,212,0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .uc-icon svg { width: 20px; height: 20px; }
+    .uc-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-sec);
+    }
+    .uc-desc { font-size: 0.88rem; color: rgba(26, 47, 74, 0.75); }
+
+    @media (max-width: 640px) {
+      .usecases-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FAQ
+    ═══════════════════════════════════════════════════════════════ */
+    #faq { background: var(--bg-page); }
+    .faq-header { text-align: center; margin-bottom: 52px; }
+    .faq-header .section-sub { margin: 0 auto; }
+
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .faq-question {
+      width: 100%;
+      padding: 20px 24px;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-body);
+      transition: background var(--transition);
+    }
+    .faq-question:hover { background: rgba(26,127,212,0.03); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: #fafcff;
+    }
+    .faq-answer-inner {
+      padding: 0 24px 24px;
+      font-size: 0.92rem;
+      color: rgba(26, 47, 74, 0.80);
+      line-height: 1.6;
+    }
+    .faq-item.active .faq-answer { max-height: 500px; }
+    .faq-icon {
+      font-size: 1.2rem;
+      color: var(--accent);
+      transition: transform 0.3s ease;
+    }
+    .faq-item.active .faq-icon { transform: rotate(45deg); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CTA SECTION
+    ═══════════════════════════════════════════════════════════════ */
+    #cta-section {
+      background: var(--bg-page);
+      padding: 96px 0;
+    }
+    .cta-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 72px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(26,127,212,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-box .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); }
+    .cta-box .section-sub { margin: 0 auto 36px; color: rgba(26, 47, 74, 0.85); }
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-note {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: rgba(26, 47, 74, 0.65);
+    }
+
+    @media (max-width: 640px) {
+      .cta-box { padding: 48px 24px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════════════ */
+    #footer {
+      background: #f5f9fe;
+      border-top: 1px solid var(--border);
+      padding: 56px 0 32px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand .nav-logo { margin-bottom: 14px; }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: rgba(26, 47, 74, 0.75);
+      max-width: 280px;
+      line-height: 1.65;
+    }
+    .footer-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 20px;
+    }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 12px; }
+    .footer-links a {
+      font-size: 0.88rem;
+      color: rgba(26, 47, 74, 0.75);
+      transition: color var(--transition);
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    .footer-bottom {
+      padding-top: 32px;
+      border-top: 1px solid rgba(26, 127, 212, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .copyright { font-size: 0.82rem; color: rgba(26, 47, 74, 0.65); }
+    .footer-legal { display: flex; gap: 24px; }
+    .footer-legal a { font-size: 0.82rem; color: rgba(26, 47, 74, 0.65); }
+
+    @media (max-width: 768px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav id="navbar">
+    <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+        <div class="logo-icon">S</div>
+        <span>SSE CN Gateway</span>
+      </a>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="#how-it-works">操作流程</a></li>
+        <li><a href="#features">功能优势</a></li>
+        <li><a href="#why-ssu">为什么选择 SSU</a></li>
+        <li><a href="#use-cases">应用场景</a></li>
+        <li><a href="#faq">常见问题</a></li>
+      </ul>
+      <div class="nav-toggle" id="nav-toggle">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-badge">Web3 跨境汇款新标杆</div>
+        <h1 class="hero-headline">人民币入金，<br/><span class="hl">开启全球资金流转</span></h1>
+        <p class="hero-sub">SSU 中国大陆网关，连接您的本地银行账户与全球 Web3 结算网络。极速到账，极低成本，安全透明。</p>
+        <div class="hero-cta">
+          <a href="#" class="btn btn-primary">立即开始</a>
+          <a href="#how-it-works" class="btn btn-outline">了解流程</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-value">5s</div>
+            <div class="stat-label">平均入金速度</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">0.1%</div>
+            <div class="stat-label">极低综合成本</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">24/7</div>
+            <div class="stat-label">全天候服务</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="exchange-card">
+          <div class="ec-label">实时入金汇率</div>
+          <div class="exchange-row">
+            <div class="currency-pill">
+              <div class="currency-icon icon-cny">¥</div>
+              <div class="currency-info">
+                <div class="c-name">CNY</div>
+                <div class="c-sub">人民币</div>
+              </div>
+            </div>
+            <div class="arrow-icon">→</div>
+            <div class="currency-pill">
+              <div class="currency-icon icon-ssu">S</div>
+              <div class="currency-info">
+                <div class="c-name">SSE</div>
+                <div class="c-sub">结算通证</div>
+              </div>
+            </div>
+          </div>
+          <div class="rate-row">
+            <div class="rate-label">当前汇率 (参考)</div>
+            <div class="rate-value">1 CNY ≈ 0.5 SSE</div>
+          </div>
+        </div>
+
+        <div class="status-card">
+          <div class="status-dot"></div>
+          <div class="status-text">网关状态：<strong>运行良好</strong> (延迟 < 200ms)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works">
+    <div class="container">
+      <div class="steps-header">
+        <div class="section-label">简单五步</div>
+        <h2 class="section-title">如何开始人民币入金</h2>
+        <p class="section-sub">简单五步，轻松完成人民币入金，开启您的全球资金流转。</p>
+      </div>
+
+      <div class="steps-wrapper">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3 class="step-title">注册账户</h3>
+            <p class="step-desc">访问 SSU 官网或 App，完成基础身份认证。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3 class="step-title">绑定银行卡</h3>
+            <p class="step-desc">绑定中国大陆主流银行借记卡。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3 class="step-title">发起入金</h3>
+            <p class="step-desc">输入人民币金额，系统自动锁定汇率。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3 class="step-title">确认支付</h3>
+            <p class="step-desc">通过网银或快捷支付完成资金划转。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <h3 class="step-title">SSU 到账</h3>
+            <p class="step-desc">资金秒级转化为 SSU，即可全球流转。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="container">
+      <div class="features-header">
+        <div class="section-label">功能优势</div>
+        <h2 class="section-title">为什么选择 CRS</h2>
+        <p class="section-sub">我们提供多种安全便捷的人民币入金渠道，助您轻松开启 Web3 跨境汇款。</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="feat-body">
+            <h3 class="feat-title">合规安全</h3>
+            <p class="feat-desc">严格遵循反洗钱 (AML) 与了解您的客户 (KYC) 政策，确保每一笔交易合规透明。</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="feat-body">
+            <h3 class="feat-title">秒级到账</h3>
+            <p class="feat-desc">依托先进的 Web3 结算网络，人民币入金与跨境划转实现秒级确认。</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 4-4-4"/></svg>
+          </div>
+          <div class="feat-body">
+            <h3 class="feat-title">极低费率</h3>
+            <p class="feat-desc">摒弃传统中转行模式，大幅降低汇率损耗与手续费，为您节省每一分钱。</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </div>
+          <div class="feat-body">
+            <h3 class="feat-title">24/7 全天候</h3>
+            <p class="feat-desc">不受银行营业时间限制，随时随地发起交易，资金永不眠。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY SSU -->
+  <section id="why-ssu">
+    <div class="container whyssu-inner">
+      <div class="whyssu-text">
+        <div class="section-label">深度解析</div>
+        <h2 class="section-title">更高效的 Web3 <br/>跨境汇款系统</h2>
+        <p class="section-sub">我们的 Web3 跨境汇款系统，为您带来更高效、更经济、更透明的资金流转方案。</p>
+        
+        <div class="ssu-panel">
+          <div class="ssu-panel-title">CRS 通证的核心价值</div>
+          <div class="ssu-info-item">
+            <div class="ssu-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="ssu-info-body">
+              <h4 class="ssu-info-title">法币与加密货币的桥梁</h4>
+              <p class="ssu-info-desc">CRS 旨在简化传统法币进入 Web3 生态的路径，提供稳定的结算中介。</p>
+            </div>
+          </div>
+          <div class="ssu-info-item">
+            <div class="ssu-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="ssu-info-body">
+              <h4 class="ssu-info-title">极速流动性</h4>
+              <p class="ssu-info-desc">在多个区块链网络中保持高流动性，确保跨境汇款即时兑换。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="whyssu-visual">
+        <div class="card" style="padding: 40px;">
+          <h3 style="margin-bottom: 24px; color: var(--text-body);">传统汇款 vs CRS 网关</h3>
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 8px;">传统电汇 (SWIFT)</div>
+              <div style="height: 8px; background: #e2e8f0; border-radius: 4px; position: relative;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 85%; background: #94a3b8; border-radius: 4px;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.75rem; color: #64748b;">
+                <span>时间：3-5 工作日</span>
+                <span>成本：3% - 7%</span>
+              </div>
+            </div>
+            <div style="background: rgba(26,127,212,0.05); padding: 16px; border-radius: 8px; border: 1px solid rgba(26,127,212,0.15);">
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent); margin-bottom: 8px;">CRS 网关</div>
+              <div style="height: 8px; background: #e2e8f0; border-radius: 4px; position: relative;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 15%; background: var(--accent); border-radius: 4px;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.75rem; color: var(--text-sec);">
+                <span>时间：秒级 / 分钟级</span>
+                <span>成本：< 0.5%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section id="use-cases">
+    <div class="container">
+      <div class="usecases-header">
+        <div class="section-label">应用场景</div>
+        <h2 class="section-title">为您的资金插上翅膀</h2>
+        <p class="section-sub">无论您是留学生、跨境工作者，还是对传统汇款方式不满意的用户，我们都能提供更优选择。</p>
+      </div>
+
+      <div class="usecases-grid">
+        <div class="usecase-card">
+          <div class="uc-header">
+            <div class="uc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <h3 class="uc-title">留学缴费与生活费</h3>
+          </div>
+          <p class="uc-desc">快速将人民币汇往海外账户，缴纳学费或支付日常开销，无需漫长等待。</p>
+        </div>
+        <div class="usecase-card">
+          <div class="uc-header">
+            <div class="uc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <h3 class="uc-title">跨境电商与贸易结算</h3>
+          </div>
+          <p class="uc-desc">中小企业与个人卖家可利用 CRS 实现极速货款结算，优化现金流。</p>
+        </div>
+        <div class="usecase-card">
+          <div class="uc-header">
+            <div class="uc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 class="uc-title">Web3 投资入金</h3>
+          </div>
+          <p class="uc-desc">合规、快速地将人民币转化为 Web3 结算通证，参与全球去中心化金融生态。</p>
+        </div>
+        <div class="usecase-card">
+          <div class="uc-header">
+            <div class="uc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <h3 class="uc-title">探亲访友汇款</h3>
+          </div>
+          <p class="uc-desc">为身在海外的亲友提供即时资金支持，简单便捷，像发红包一样简单。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="container">
+      <div class="faq-header">
+        <div class="section-label">常见问题</div>
+        <h2 class="section-title">解答您的疑问</h2>
+        <p class="section-sub">关于 SSE 中国大陆网关，您想知道的一切都在这里。</p>
+      </div>
+
+      <div class="faq-container">
+        <div class="faq-item">
+          <button class="faq-question">
+            人民币入金需要多长时间到账？
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              通常情况下，资金会在确认支付后的 1-5 分钟内完成结算并转化为 SSU。在极少数银行系统维护期间，可能会有小幅延迟。
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            CRS 网关是否合规？
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              是的，我们与持有相关牌照的第三方支付机构及合规网关合作伙伴紧密协作，严格遵守当地法律法规，并对所有交易进行实时风险监测。
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            入金是否有额度限制？
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              额度取决于您的身份认证等级 (KYC)。基础认证用户每日额度较低，完成高级认证后可大幅提升每日及每月入金限额。
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            支持哪些银行？
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              我们支持中国大陆绝大多数主流银行，包括但不限于：工商银行、建设银行、农业银行、中国银行、招商银行、交通银行等。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section id="cta-section">
+    <div class="container">
+      <div class="cta-box">
+        <h2 class="section-title">准备好体验极速入金了吗？</h2>
+        <p class="section-sub">加入我们，体验更低成本、更快到账、更透明的 Web3 跨境汇款新方式。</p>
+        <div class="cta-buttons">
+          <a href="#" class="btn btn-primary">立即注册</a>
+          <a href="#" class="btn btn-outline">联系客服</a>
+        </div>
+        <p class="cta-note">* 请确保使用本人实名银行卡进行操作</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo">
+            <div class="logo-icon">S</div>
+            <span>SSU Gateway</span>
+          </div>
+          <p>连接传统法币与 Web3 未来，让价值流转无国界。</p>
+        </div>
+        <div>
+          <h4 class="footer-title">产品服务</h4>
+          <ul class="footer-links">
+            <li><a href="#">人民币入金</a></li>
+            <li><a href="#">跨境汇款</a></li>
+            <li><a href="#">SSU 钱包</a></li>
+            <li><a href="#">开发者 API</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">关于我们</h4>
+          <ul class="footer-links">
+            <li><a href="#">公司简介</a></li>
+            <li><a href="#">合规说明</a></li>
+            <li><a href="#">隐私政策</a></li>
+            <li><a href="#">服务协议</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="copyright">© 2026 SSE Global. All rights reserved.</div>
+        <div class="footer-legal">
+          <a href="#">条款</a>
+          <a href="#">隐私</a>
+          <a href="#">Cookie 设置</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)';
+        navbar.style.background = 'rgba(238, 244, 252, 0.95)';
+        navbar.style.backdropFilter = 'blur(10px)';
+      } else {
+        navbar.style.boxShadow = 'none';
+        navbar.style.background = 'var(--bg-page)';
+        navbar.style.backdropFilter = 'none';
+      }
+    });
+
+    // Mobile menu toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    navToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+    });
+
+    // FAQ Accordion
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+      const question = item.querySelector('.faq-question');
+      question.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        // Close all
+        faqItems.forEach(i => i.classList.remove('active'));
+        // Open current if it wasn't active
+        if (!isActive) item.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
