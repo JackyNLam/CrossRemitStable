@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSU HK Gateway — HKD to SSU Token Exchange</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-page:    #eef4fc;
+      --bg-card:    #ffffff;
+      --accent:     #1a7fd4;
+      --text-body:  #1a2f4a;
+      --text-sec:   #1a7fd4;
+      --border:     rgba(26, 127, 212, 0.18);
+      --radius:     12px;
+      --transition: 0.25s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      font-family: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--text-sec); }
+
+    /* ─── Utility ───────────────────────────────────────────────────── */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      color: rgba(26, 47, 74, 0.70);
+      max-width: 620px;
+    }
+
+    section { padding: 88px 0; }
+
+    /* ─── Card ──────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .card:hover {
+      border-color: rgba(26, 127, 212, 0.40);
+      transform: translateY(-3px);
+    }
+
+    /* ─── Buttons ───────────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: 13px 32px;
+      border-radius: 8px;
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+      border: 2px solid transparent;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background: #1568b0;
+      border-color: #1568b0;
+      color: #ffffff;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn-outline:hover {
+      background: rgba(26, 127, 212, 0.08);
+      color: var(--text-sec);
+      border-color: var(--text-sec);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════════════════════════ */
+    #navbar {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: var(--bg-page);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text-body);
+    }
+    .nav-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(26, 47, 74, 0.75);
+      transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Hamburger */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text-body);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    @media (max-width: 768px) {
+      .nav-toggle { display: flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 68px;
+        left: 0;
+        right: 0;
+        background: var(--bg-page);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        gap: 0;
+        padding: 12px 0;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li a {
+        display: block;
+        padding: 12px 24px;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════════════ */
+    #hero {
+      padding: 100px 0 96px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle geometric background pattern */
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 65% 40%, rgba(79,163,224,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 70%, rgba(26,127,212,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(26, 127, 212, 0.08);
+      border: 1px solid rgba(26, 127, 212, 0.25);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sec);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .hero-headline {
+      font-size: clamp(2rem, 4.5vw, 3.1rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text-body);
+      margin-bottom: 20px;
+    }
+    .hero-headline .hl {
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: rgba(26, 47, 74, 0.72);
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+    .stat-item {}
+    .stat-value {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: rgba(26, 47, 74, 0.65);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Hero visual panel */
+    .hero-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .exchange-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .exchange-card .ec-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(26, 47, 74, 0.65);
+      margin-bottom: 8px;
+    }
+    .exchange-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .currency-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(26, 127, 212, 0.07);
+      border: 1px solid rgba(26, 127, 212, 0.20);
+      border-radius: 8px;
+      padding: 10px 16px;
+      flex: 1;
+    }
+    .currency-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .icon-hkd { background: rgba(26,127,212,0.12); color: var(--accent); }
+    .icon-ssu { background: rgba(26,127,212,0.10); color: var(--text-sec); }
+
+    .currency-info .c-name { font-size: 0.85rem; font-weight: 700; color: var(--text-body); }
+    .currency-info .c-sub  { font-size: 0.72rem; color: rgba(26,47,74,0.45); }
+
+    .arrow-icon {
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .rate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .rate-label { font-size: 0.78rem; color: rgba(26,47,74,0.45); }
+    .rate-value { font-size: 0.9rem; font-weight: 700; color: var(--text-sec); }
+
+    .status-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #4ade80;
+      flex-shrink: 0;
+    }
+    .status-text { font-size: 0.85rem; color: rgba(26, 47, 74, 0.75); }
+    .status-text strong { color: var(--text-body); }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .hero-visual { max-width: 480px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PAYMENT METHODS
+    ═══════════════════════════════════════════════════════════════ */
+    #payment { background: var(--bg-card); }
+    .payment-header { text-align: center; margin-bottom: 52px; }
+    .payment-header .section-sub { margin: 0 auto; }
+
+    .payment-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .payment-card {
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .payment-card:hover {
+      border-color: rgba(26, 127, 212, 0.40);
+      transform: translateY(-3px);
+    }
+
+    .pm-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: rgba(26, 127, 212, 0.08);
+      border: 1px solid rgba(26, 127, 212, 0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .pm-icon svg { width: 26px; height: 26px; }
+
+    .pm-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      margin-bottom: 10px;
+    }
+    .pm-desc { font-size: 0.9rem; color: rgba(26,47,74,0.65); }
+
+    .pm-tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .tag-green  { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+    .tag-blue   { background: rgba(26,127,212,0.08); color: var(--accent); border: 1px solid rgba(26,127,212,0.20); }
+    .tag-purple { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.25); }
+
+    @media (max-width: 768px) {
+      .payment-grid { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .payment-grid { grid-template-columns: repeat(2, 1fr); }
+      .payment-card:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; width: 100%; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════════════════════════ */
+    #how-it-works { background: var(--bg-page); }
+    .hiw-header { text-align: center; margin-bottom: 60px; }
+    .hiw-header .section-sub { margin: 0 auto; }
+
+    .steps-wrapper {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+
+    /* Connector line */
+    .steps-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 38px;
+      left: calc(12.5% + 26px);
+      right: calc(12.5% + 26px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent) 0%, rgba(26,127,212,0.15) 100%);
+      z-index: 0;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-num {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .step-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 8px;
+    }
+    .step-desc { font-size: 0.83rem; color: rgba(26,47,74,0.58); }
+
+    @media (max-width: 768px) {
+      .steps-wrapper {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .steps-wrapper::before { display: none; }
+      .step { flex-direction: row; text-align: left; gap: 20px; }
+      .step-num { margin-bottom: 0; flex-shrink: 0; }
+      .step-body {}
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FEATURES
+    ═══════════════════════════════════════════════════════════════ */
+    #features { background: var(--bg-card); }
+    .features-header { text-align: center; margin-bottom: 52px; }
+    .features-header .section-sub { margin: 0 auto; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      display: flex;
+      gap: 20px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .feature-card:hover {
+      border-color: rgba(26,127,212,0.40);
+      transform: translateY(-3px);
+    }
+
+    .feat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(26,127,212,0.08);
+      border: 1px solid rgba(26,127,212,0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .feat-icon svg { width: 22px; height: 22px; }
+
+    .feat-body {}
+    .feat-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-body);
+      margin-bottom: 8px;
+    }
+    .feat-desc { font-size: 0.88rem; color: rgba(26,47,74,0.60); }
+
+    @media (max-width: 640px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       COMPLIANCE & TRUST
+    ═══════════════════════════════════════════════════════════════ */
+    #compliance { background: var(--bg-page); }
+    .compliance-header { text-align: center; margin-bottom: 52px; }
+    .compliance-header .section-sub { margin: 0 auto; }
+
+    .compliance-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .compliance-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .compliance-card:hover {
+      border-color: rgba(26,127,212,0.40);
+      transform: translateY(-3px);
+    }
+
+    .cc-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .cc-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(26,127,212,0.08);
+      border: 1px solid rgba(26,127,212,0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cc-icon svg { width: 20px; height: 20px; }
+    .cc-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-sec);
+    }
+    .cc-desc { font-size: 0.88rem; color: rgba(26,47,74,0.60); }
+
+    @media (max-width: 640px) {
+      .compliance-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       WHY HONG KONG
+    ═══════════════════════════════════════════════════════════════ */
+    #why-hk { background: var(--bg-card); }
+    .whyhk-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .whyhk-text .section-sub { margin-bottom: 32px; }
+
+    .hk-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .hk-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.92rem;
+      color: rgba(26, 47, 74, 0.85);
+    }
+    .hk-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(26,127,212,0.10);
+      border: 1px solid rgba(26,127,212,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .hk-check svg { width: 10px; height: 10px; }
+
+    .hk-panel {
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+    }
+    .hk-panel-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      margin-bottom: 24px;
+    }
+    .hk-stat-row {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .hk-stat-item {}
+    .hk-stat-label {
+      font-size: 0.78rem;
+      color: rgba(26,47,74,0.50);
+      margin-bottom: 6px;
+    }
+    .hk-bar-track {
+      height: 8px;
+      background: rgba(26,127,212,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .hk-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--text-sec));
+    }
+    .hk-bar-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+    }
+    .hk-bar-meta span { font-size: 0.72rem; color: rgba(26,47,74,0.40); }
+    .hk-bar-meta strong { font-size: 0.72rem; color: var(--text-sec); }
+
+    @media (max-width: 900px) {
+      .whyhk-inner { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CTA SECTION
+    ═══════════════════════════════════════════════════════════════ */
+    #cta-section {
+      background: var(--bg-page);
+      padding: 96px 0;
+    }
+    .cta-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 72px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(26,127,212,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-box .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); }
+    .cta-box .section-sub { margin: 0 auto 36px; }
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-note {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: rgba(26,47,74,0.35);
+    }
+
+    @media (max-width: 640px) {
+      .cta-box { padding: 48px 24px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════════════ */
+    #footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 56px 0 32px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand .nav-logo { margin-bottom: 14px; }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: rgba(26,47,74,0.50);
+      max-width: 280px;
+      line-height: 1.65;
+    }
+    .footer-col-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      margin-bottom: 16px;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-links a {
+      font-size: 0.87rem;
+      color: rgba(26,47,74,0.55);
+      transition: color var(--transition);
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    .footer-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 24px;
+    }
+    .footer-bottom {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-legal {
+      font-size: 0.78rem;
+      color: rgba(26,47,74,0.35);
+      max-width: 560px;
+      line-height: 1.6;
+    }
+    .footer-contract {
+      font-size: 0.78rem;
+      color: rgba(26,127,212,0.60);
+      font-family: 'Courier New', monospace;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="logo-icon">S</div>
+        SSU HK Gateway
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#payment">Fees</a></li>
+        <li><a href="#compliance">Compliance</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <div class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <!-- Left: Copy -->
+      <div class="hero-copy">
+        <div class="hero-badge">SFC-Compliant &nbsp;·&nbsp; HKUST FinTech Project</div>
+        <h1 class="hero-headline">
+          Convert <span class="hl">HKD to SSU</span> —<br>
+          Fast, Regulated,<br>Seamless
+        </h1>
+        <p class="hero-sub">
+          Hong Kong's compliant fiat-to-token gateway. Deposit via FPS or bank transfer and receive SSU tokens instantly.
+        </p>
+        <div class="hero-cta">
+          <a href="#cta-section" class="btn btn-primary">Get SSU Now</a>
+          <a href="#how-it-works" class="btn btn-outline">How It Works</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-value">FPS</div>
+            <div class="stat-label">Real-time Settlement</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">SFC</div>
+            <div class="stat-label">Regulatory Framework</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">eHKD</div>
+            <div class="stat-label">Future-Ready</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Visual -->
+      <div class="hero-visual">
+        <div class="exchange-card">
+          <div class="ec-label">Live Exchange Preview</div>
+          <div class="exchange-row">
+            <div class="currency-pill">
+              <div class="currency-icon icon-hkd">HKD</div>
+              <div class="currency-info">
+                <div class="c-name">Hong Kong Dollar</div>
+                <div class="c-sub">Fiat Currency</div>
+              </div>
+            </div>
+            <div class="arrow-icon">&#8594;</div>
+            <div class="currency-pill">
+              <div class="currency-icon icon-ssu">SSU</div>
+              <div class="currency-info">
+                <div class="c-name">SSU Token</div>
+                <div class="c-sub">Web3 Asset</div>
+              </div>
+            </div>
+          </div>
+          <div class="rate-row">
+            <span class="rate-label">Indicative Rate</span>
+            <span class="rate-value">1 HKD = 1 SSU (1:1 Peg)</span>
+          </div>
+        </div>
+
+        <div class="status-card">
+          <div class="status-dot"></div>
+          <div class="status-text">
+            <strong>Gateway Operational</strong> — FPS &amp; Bank Transfer channels active
+          </div>
+        </div>
+
+        <div class="exchange-card" style="padding: 20px 28px;">
+          <div class="ec-label">Supported Channels</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+            <span style="background:rgba(26,127,212,0.08);border:1px solid rgba(26,127,212,0.20);border-radius:6px;padding:6px 14px;font-size:0.8rem;color:var(--accent);font-weight:600;">FPS 轉數快</span>
+            <span style="background:rgba(26,127,212,0.08);border:1px solid rgba(26,127,212,0.20);border-radius:6px;padding:6px 14px;font-size:0.8rem;color:var(--accent);font-weight:600;">Bank Transfer</span>
+            <span style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.25);border-radius:6px;padding:6px 14px;font-size:0.8rem;color:#a78bfa;font-weight:600;">eHKD (Coming Soon)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PAYMENT METHODS
+═══════════════════════════════════════════════════════════════ -->
+<section id="payment">
+  <div class="container">
+    <div class="payment-header">
+      <div class="section-label">Deposit Options</div>
+      <h2 class="section-title">Supported Payment Methods</h2>
+      <p class="section-sub">Choose from multiple HKD deposit channels — all processed securely within our SFC-compliant infrastructure.</p>
+    </div>
+    <div class="payment-grid">
+
+      <!-- FPS -->
+      <div class="payment-card">
+        <div class="pm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="pm-title">HKD via FPS (轉數快)</div>
+        <p class="pm-desc">Leverage Hong Kong's Faster Payment System for near real-time HKD deposits. Funds are confirmed within seconds and SSU tokens are issued immediately upon settlement.</p>
+        <span class="pm-tag tag-green">Near Real-Time</span>
+      </div>
+
+      <!-- Bank Transfer -->
+      <div class="payment-card">
+        <div class="pm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
+        <div class="pm-title">HKD via Bank Transfer</div>
+        <p class="pm-desc">Suitable for larger institutional or retail transfers. Supports all major Hong Kong banks including HSBC, Hang Seng, and Bank of China (HK). T+1 settlement.</p>
+        <span class="pm-tag tag-blue">Larger Transfers</span>
+      </div>
+
+      <!-- eHKD -->
+      <div class="payment-card">
+        <div class="pm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <div class="pm-title">eHKD — Digital HKD</div>
+        <p class="pm-desc">Future-ready settlement via the HKMA's eHKD digital currency initiative. Enables programmable, atomic settlement between fiat and SSU tokens on-chain.</p>
+        <span class="pm-tag tag-purple">Future-Ready</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HOW IT WORKS
+═══════════════════════════════════════════════════════════════ -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="hiw-header">
+      <div class="section-label">Process</div>
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">A transparent, four-step process from account creation to receiving SSU tokens in your wallet.</p>
+    </div>
+    <div class="steps-wrapper">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Create Account</div>
+          <p class="step-desc">Register with your email and set up your secure SSU HK Gateway account.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Complete KYC</div>
+          <p class="step-desc">Submit identity documents for AML/KYC verification in compliance with SFC requirements.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Deposit HKD</div>
+          <p class="step-desc">Transfer HKD via FPS (轉數快) or bank transfer to your designated gateway account.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Receive SSU Tokens</div>
+          <p class="step-desc">SSU tokens are minted and delivered directly to your registered Web3 wallet address.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FEATURES
+═══════════════════════════════════════════════════════════════ -->
+<section id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="section-label">Platform Capabilities</div>
+      <h2 class="section-title">Built for the Modern Financial Ecosystem</h2>
+      <p class="section-sub">SSU HK Gateway combines regulatory compliance with cutting-edge Web3 infrastructure.</p>
+    </div>
+    <div class="features-grid">
+
+      <!-- Fast Settlement -->
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Fast HKD Settlement</div>
+          <p class="feat-desc">FPS-powered deposits are confirmed in near real-time. Larger bank transfers settle on T+1. No unnecessary delays in your token issuance workflow.</p>
+        </div>
+      </div>
+
+      <!-- Transparent Workflow -->
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Transparent Conversion Workflow</div>
+          <p class="feat-desc">Every HKD deposit and SSU issuance event is logged on-chain. Users can verify their transaction history through a public audit trail at any time.</p>
+        </div>
+      </div>
+
+      <!-- SFC Compliant -->
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">SFC-Compliant Framework</div>
+          <p class="feat-desc">Designed in alignment with the Securities and Futures Commission of Hong Kong's regulatory guidelines for virtual asset service providers (VASPs).</p>
+        </div>
+      </div>
+
+      <!-- eHKD Compatibility -->
+      <div class="feature-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+          </svg>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">eHKD Compatibility</div>
+          <p class="feat-desc">Architected to integrate with the HKMA's eHKD pilot programme. Enables atomic, programmable settlement between digital HKD and SSU tokens as the ecosystem matures.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     COMPLIANCE & TRUST
+═══════════════════════════════════════════════════════════════ -->
+<section id="compliance">
+  <div class="container">
+    <div class="compliance-header">
+      <div class="section-label">Regulatory Standards</div>
+      <h2 class="section-title">Compliance &amp; Trust</h2>
+      <p class="section-sub">SSU HK Gateway is built on a foundation of regulatory integrity, ensuring every transaction meets Hong Kong's highest financial standards.</p>
+    </div>
+    <div class="compliance-grid">
+
+      <!-- SFC -->
+      <div class="compliance-card">
+        <div class="cc-header">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="cc-title">SFC-Compliant Framework</div>
+        </div>
+        <p class="cc-desc">The platform architecture adheres to the Securities and Futures Commission's regulatory framework for virtual asset trading platforms (VATPs) in Hong Kong. All operational processes are designed to satisfy VATP licensing criteria.</p>
+      </div>
+
+      <!-- AML / KYC -->
+      <div class="compliance-card">
+        <div class="cc-header">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="cc-title">AML and KYC Checks</div>
+        </div>
+        <p class="cc-desc">Mandatory Know Your Customer (KYC) identity verification and Anti-Money Laundering (AML) screening are enforced for all users. Verification is powered by industry-standard identity document checks and sanctions screening.</p>
+      </div>
+
+      <!-- Segregated Processes -->
+      <div class="compliance-card">
+        <div class="cc-header">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="9" height="9" rx="1"/>
+              <rect x="13" y="3" width="9" height="9" rx="1"/>
+              <rect x="2" y="13" width="9" height="9" rx="1"/>
+              <rect x="13" y="13" width="9" height="9" rx="1"/>
+            </svg>
+          </div>
+          <div class="cc-title">Segregated Operational Processes</div>
+        </div>
+        <p class="cc-desc">Client fiat funds are held in segregated accounts, strictly separated from operational capital. Token issuance and redemption workflows are independently audited to ensure full reserve backing at all times.</p>
+      </div>
+
+      <!-- Transaction Monitoring -->
+      <div class="compliance-card">
+        <div class="cc-header">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="cc-title">Transaction Monitoring</div>
+        </div>
+        <p class="cc-desc">Continuous, real-time transaction monitoring detects and flags suspicious activity. All flagged transactions are reviewed by the compliance team in accordance with HKMA and SFC reporting obligations.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     WHY HONG KONG
+═══════════════════════════════════════════════════════════════ -->
+<section id="why-hk">
+  <div class="container">
+    <div class="whyhk-inner">
+      <div class="whyhk-text">
+        <div class="section-label">Jurisdiction</div>
+        <h2 class="section-title">Why Hong Kong</h2>
+        <p class="section-sub">Built for Hong Kong's regulated digital asset environment — where traditional finance meets Web3 innovation under a clear legal framework.</p>
+        <ul class="hk-list">
+          <li>
+            <div class="hk-check">
+              <svg viewBox="0 0 12 12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 6 5 9 10 3"/>
+              </svg>
+            </div>
+            Supports FPS (轉數快), the HKMA's real-time retail payment infrastructure
+          </li>
+          <li>
+            <div class="hk-check">
+              <svg viewBox="0 0 12 12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 6 5 9 10 3"/>
+              </svg>
+            </div>
+            Aligned with SFC licensing requirements for virtual asset service providers
+          </li>
+          <li>
+            <div class="hk-check">
+              <svg viewBox="0 0 12 12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 6 5 9 10 3"/>
+              </svg>
+            </div>
+            Compatible with the HKMA's eHKD pilot and Project Ensemble initiatives
+          </li>
+          <li>
+            <div class="hk-check">
+              <svg viewBox="0 0 12 12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 6 5 9 10 3"/>
+              </svg>
+            </div>
+            Operates within Hong Kong's established AML/CFT regulatory regime
+          </li>
+          <li>
+            <div class="hk-check">
+              <svg viewBox="0 0 12 12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 6 5 9 10 3"/>
+              </svg>
+            </div>
+            Serves as the HKD end of a cross-border Web3 financial ecosystem (HKD ⟺ SSU)
+          </li>
+          <li>
+            <div class="hk-check">
+              <svg viewBox="0 0 12 12" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 6 5 9 10 3"/>
+              </svg>
+            </div>
+            Local bank transfer support across HSBC, Hang Seng, Bank of China (HK), and more
+          </li>
+        </ul>
+      </div>
+
+      <div class="hk-panel">
+        <div class="hk-panel-title">HK Digital Asset Readiness</div>
+        <div class="hk-stat-row">
+          <div class="hk-stat-item">
+            <div class="hk-stat-label">FPS Adoption Rate (Retail)</div>
+            <div class="hk-bar-track"><div class="hk-bar-fill" style="width:88%"></div></div>
+            <div class="hk-bar-meta"><span>0%</span><strong>88%</strong></div>
+          </div>
+          <div class="hk-stat-item">
+            <div class="hk-stat-label">SFC VATP Licensing Progress</div>
+            <div class="hk-bar-track"><div class="hk-bar-fill" style="width:72%"></div></div>
+            <div class="hk-bar-meta"><span>0%</span><strong>72%</strong></div>
+          </div>
+          <div class="hk-stat-item">
+            <div class="hk-stat-label">eHKD Pilot Phase Completion</div>
+            <div class="hk-bar-track"><div class="hk-bar-fill" style="width:60%"></div></div>
+            <div class="hk-bar-meta"><span>0%</span><strong>60%</strong></div>
+          </div>
+          <div class="hk-stat-item">
+            <div class="hk-stat-label">Cross-Border Web3 Ecosystem Coverage</div>
+            <div class="hk-bar-track"><div class="hk-bar-fill" style="width:45%"></div></div>
+            <div class="hk-bar-meta"><span>0%</span><strong>45%</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FAQ
+═══════════════════════════════════════════════════════════════ -->
+<section id="faq" style="background:var(--bg-page);">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:52px;">
+      <div class="section-label">Common Questions</div>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-sub" style="margin:0 auto;">Everything you need to know about SSU HK Gateway.</p>
+    </div>
+    <div style="max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+
+      <details class="card" style="cursor:pointer;">
+        <summary style="font-weight:700;color:var(--text-body);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          What is SSU HK Gateway?
+          <span style="color:var(--accent);font-size:1.2rem;flex-shrink:0;">&#43;</span>
+        </summary>
+        <p style="margin-top:14px;font-size:0.9rem;color:rgba(26,47,74,0.65);">SSU HK Gateway is an academic FinTech project developed at HKUST. It serves as the Hong Kong end of a cross-border Web3 financial ecosystem, enabling users to deposit HKD via FPS or bank transfer and receive SSU tokens in their Web3 wallet.</p>
+      </details>
+
+      <details class="card" style="cursor:pointer;">
+        <summary style="font-weight:700;color:var(--text-body);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          Is KYC verification mandatory?
+          <span style="color:var(--accent);font-size:1.2rem;flex-shrink:0;">&#43;</span>
+        </summary>
+        <p style="margin-top:14px;font-size:0.9rem;color:rgba(26,47,74,0.65);">Yes. All users are required to complete KYC identity verification before making any deposits. This is a regulatory requirement under the SFC framework and Hong Kong's AML/CFT obligations. Verification typically takes 1–2 business days.</p>
+      </details>
+
+      <details class="card" style="cursor:pointer;">
+        <summary style="font-weight:700;color:var(--text-body);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          What is the HKD to SSU conversion rate?
+          <span style="color:var(--accent);font-size:1.2rem;flex-shrink:0;">&#43;</span>
+        </summary>
+        <p style="margin-top:14px;font-size:0.9rem;color:rgba(26,47,74,0.65);">SSU tokens are issued at a 1:1 peg to HKD. For every 1 HKD deposited (net of applicable fees), 1 SSU token is issued to your wallet. The platform maintains full reserve backing to support this peg.</p>
+      </details>
+
+      <details class="card" style="cursor:pointer;">
+        <summary style="font-weight:700;color:var(--text-body);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          How long does a deposit take to process?
+          <span style="color:var(--accent);font-size:1.2rem;flex-shrink:0;">&#43;</span>
+        </summary>
+        <p style="margin-top:14px;font-size:0.9rem;color:rgba(26,47,74,0.65);">FPS deposits are confirmed in near real-time (typically within seconds). Bank transfers settle on T+1 (next business day). eHKD settlements, once available, will enable atomic real-time settlement.</p>
+      </details>
+
+      <details class="card" style="cursor:pointer;">
+        <summary style="font-weight:700;color:var(--text-body);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          Is this platform regulated by the SFC?
+          <span style="color:var(--accent);font-size:1.2rem;flex-shrink:0;">&#43;</span>
+        </summary>
+        <p style="margin-top:14px;font-size:0.9rem;color:rgba(26,47,74,0.65);">SSU HK Gateway is an academic prototype designed to operate within the SFC's regulatory framework for virtual asset trading platforms (VATPs). As a HKUST FinTech research project, it demonstrates compliance-by-design principles aligned with SFC licensing requirements.</p>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CTA SECTION
+═══════════════════════════════════════════════════════════════ -->
+<section id="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <div class="section-label" style="text-align:center;">Get Started Today</div>
+      <h2 class="section-title" style="text-align:center;">Ready to Convert HKD to SSU?</h2>
+      <p class="section-sub" style="text-align:center;margin:0 auto 36px;">Join Hong Kong's compliant fiat-to-token gateway. Fast settlement, transparent workflow, and full regulatory alignment.</p>
+      <div class="cta-buttons">
+        <a href="#" class="btn btn-primary">Deposit HKD</a>
+        <a href="#how-it-works" class="btn btn-outline">Learn More</a>
+      </div>
+      <p class="cta-note">KYC verification required &nbsp;·&nbsp; SFC-compliant framework &nbsp;·&nbsp; HKUST FinTech Project</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════════════ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo" style="display:inline-flex;margin-bottom:14px;">
+          <div class="logo-icon">S</div>
+          SSU HK Gateway
+        </a>
+        <p>Hong Kong's compliant fiat-to-token exchange portal. Part of a cross-border Web3 financial ecosystem developed at HKUST.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Platform</div>
+        <ul class="footer-links">
+          <li><a href="#">About</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#payment">Fees</a></li>
+          <li><a href="#compliance">Compliance</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <ul class="footer-links">
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">KYC Guide</a></li>
+          <li><a href="#">API Docs</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <div class="footer-bottom">
+      <div class="footer-legal">
+        This platform operates under the SFC regulatory framework for virtual asset service providers in Hong Kong. KYC verification is required for all users. SSU HK Gateway is an academic FinTech prototype developed at HKUST and does not constitute a licensed financial service. &copy; 2025 SSU HK Gateway — HKUST FinTech Project.
+      </div>
+      <div class="footer-contract">[SSU Contract Address: TBD]</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── JavaScript ─────────────────────────────────────────────── -->
+<script>
+  // Mobile nav toggle
+  const toggle = document.getElementById('navToggle');
+  const links  = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => {
+    links.classList.toggle('open');
+  });
+  // Close nav on link click
+  links.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => links.classList.remove('open'));
+  });
+
+  // FAQ: swap + / - icon
+  document.querySelectorAll('details').forEach(d => {
+    d.addEventListener('toggle', () => {
+      const icon = d.querySelector('summary span');
+      icon.textContent = d.open ? '−' : '+';
+    });
+  });
+
+  // Subtle scroll-reveal animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.card, .payment-card, .feature-card, .compliance-card, .step, .hk-panel, .exchange-card, .status-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(18px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease, border-color 0.25s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
